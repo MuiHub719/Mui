@@ -74,6 +74,8 @@ local games = {
 "BLADE BALL",
 "BLOX FRUITS",
 "DEAD RAILS",
+"RIVALS",
+"BLUE LOCK: RIVALS",
 "Universal Scripts",
 "Universal Hubs"
 }
@@ -165,6 +167,18 @@ gameButton.MouseButton1Click:Connect(function()
 			loadstring(game:HttpGet("https://raw.githubusercontent.com/Zypherion-X19/Zy/refs/heads/main/Blade-Ball.lua"))()  
 		end)  
 
+elseif gameName == "BLUE LOCK: RIVALS" then
+			local placeholder = Instance.new("TextLabel")
+			placeholder.Size = UDim2.new(0, 260, 0, 40)
+			placeholder.Position = UDim2.new(0, 20, 0, 50)
+			placeholder.Text = "Coming Soon..."
+			placeholder.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+			placeholder.TextColor3 = Color3.fromRGB(200, 200, 200)
+			placeholder.Font = Enum.Font.SourceSans
+			placeholder.TextSize = 18
+			placeholder.TextXAlignment = Enum.TextXAlignment.Center
+			placeholder.Parent = gameFrame
+
 	elseif gameName == "GROW A GARDEN" then  
 		local ronixButton = Instance.new("TextButton")  
 		ronixButton.Size = UDim2.new(0, 260, 0, 40)  
@@ -178,6 +192,18 @@ gameButton.MouseButton1Click:Connect(function()
 		ronixButton.MouseButton1Click:Connect(function()  
 			loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/a8f02a61fc38bf9256dd0f17be6b16d7.lua"))()  
 		end)  
+
+elseif gameName == "RIVALS" then
+			local placeholder = Instance.new("TextLabel")
+			placeholder.Size = UDim2.new(0, 260, 0, 40)
+			placeholder.Position = UDim2.new(0, 20, 0, 50)
+			placeholder.Text = "Coming Soon..."
+			placeholder.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+			placeholder.TextColor3 = Color3.fromRGB(200, 200, 200)
+			placeholder.Font = Enum.Font.SourceSans
+			placeholder.TextSize = 18
+			placeholder.TextXAlignment = Enum.TextXAlignment.Center
+			placeholder.Parent = gameFrame
 
 	elseif gameName == "FISCH" then  
 		local nathubButton = Instance.new("TextButton")  
