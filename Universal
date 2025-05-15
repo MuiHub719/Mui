@@ -122,7 +122,16 @@ local games = {
     "Any DH Games"
 }
 
--- Helper to add script buttons
+-- Helper: notification
+local function notify(title, text)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = title;
+        Text = text;
+        Duration = 2;
+    })
+end
+
+-- Helper: add script buttons (with wait+notifications)
 local function addScriptButton(parent, text, yPos, action)
     local b = Instance.new("TextButton", parent)
     b.Size = UDim2.new(0, 260, 0, 40)
@@ -133,7 +142,12 @@ local function addScriptButton(parent, text, yPos, action)
     b.Font = Enum.Font.GothamSemibold
     b.TextSize = 18
     Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
-    b.MouseButton1Click:Connect(action)
+    b.MouseButton1Click:Connect(function()
+        notify("Script Running", text)
+        wait(2)
+        action()
+        notify("Script Loaded", text)
+    end)
 end
 
 -- Create game buttons
@@ -159,12 +173,10 @@ for i, gameName in ipairs(games) do
     end)
 
     btn.MouseButton1Click:Connect(function()
-        -- Remove old sub‐GUI
         if mainFrame:FindFirstChild("GameSubGui") then
             mainFrame.GameSubGui:Destroy()
         end
 
-        -- Sub‐GUI container
         local subGui = Instance.new("Frame", mainFrame)
         subGui.Name = "GameSubGui"
         subGui.Size = UDim2.new(0, 300, 0, 200)
@@ -174,7 +186,6 @@ for i, gameName in ipairs(games) do
         subGui.Draggable = true
         Instance.new("UICorner", subGui).CornerRadius = UDim.new(0, 8)
 
-        -- Close sub‐GUI
         local closeSub = Instance.new("TextButton", subGui)
         closeSub.Text = "X"
         closeSub.Size = UDim2.new(0, 30, 0, 30)
@@ -186,7 +197,6 @@ for i, gameName in ipairs(games) do
             subGui:Destroy()
         end)
 
-        -- Populate based on selection
         if gameName == "DEAD RAILS" then
             addScriptButton(subGui, "Null-Fire",          40, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScripts/Null-Fire/main/Loader"))()
