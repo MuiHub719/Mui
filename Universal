@@ -33,7 +33,6 @@ local mainFrame = Instance.new("Frame", mainGui)
 mainFrame.Size = UDim2.new(0, 420, 0, 420)
 mainFrame.Position = UDim2.new(0.5, -210, 0.5, -210)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 16)
@@ -145,7 +144,8 @@ local games = {
     "Universal Scripts",
     "Universal Hubs",
     "Any DH Games",
-    "Murder Mystery 2"
+    "Murder Mystery 2",
+    "ARSENAL"
 }
 
 -- Utility: notification
@@ -240,11 +240,11 @@ for i, gameName in ipairs(games) do
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/DonjoScripts/Public-Scripts/refs/heads/Slap-Battles/TheFastestBondStealer.lua"))()
             end)
             addScriptButton(sub, "Airweld", 190, function()
-                notify("Key: Ringta")                     -- 3rd notification
-                notify("Airweld Running...")              -- 1st
+                notify("Key: Ringta")
+                notify("Airweld Running...")
                 wait(2)
                 loadstring(game:HttpGet('https://raw.githubusercontent.com/hbjrev/airweld.github.io/refs/heads/main/RINGTA.lua'))()
-                notify("Airweld Loaded!")                 -- 2nd
+                notify("Airweld Loaded!")
             end)
 
         elseif gameName == "BLADE BALL" then
@@ -299,6 +299,11 @@ for i, gameName in ipairs(games) do
         elseif gameName == "Murder Mystery 2" then
             addScriptButton(sub, "YARHM", 40, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Joystickplays/psychic-octo-invention/main/yarhm.lua", false))()
+            end)
+
+        elseif gameName == "ARSENAL" then
+            addScriptButton(sub, "QUOTAS HUB (OP)", 40, function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/Insertl/QuotasHub/main/BETAv1.3"))()
             end)
         end
     end)
