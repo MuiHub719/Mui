@@ -157,18 +157,21 @@ local function notify(msg)
     })
 end
 
--- Helper to add script buttons
-local function addScriptButton(parent, text, yPos, action)
-    local b = Instance.new("TextButton", parent)
-    b.Size = UDim2.new(0, 260, 0, 40)
-    b.Position = UDim2.new(0, 20, 0, yPos)
-    b.Text = text
-    b.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    b.TextColor3 = Color3.fromRGB(255, 255, 255)
-    b.Font = Enum.Font.GothamSemibold
-    b.TextSize = 18
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
-    b.MouseButton1Click:Connect(function()
+-- Helper to add script buttons inside a scrolling sub-frame
+local function addScriptButton(parent, text, action)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 40)
+    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamSemibold
+    btn.TextSize = 18
+    btn.AutoButtonColor = false
+    btn.Text = text
+    btn.LayoutOrder = parent:GetAttribute("NextOrder")
+    parent:SetAttribute("NextOrder", parent:GetAttribute("NextOrder") + 1)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    btn.Parent = parent
+    btn.MouseButton1Click:Connect(function()
         notify(text .. " Running...")
         wait(2)
         action()
@@ -176,7 +179,7 @@ local function addScriptButton(parent, text, yPos, action)
     end)
 end
 
--- Create game buttons
+-- Populate main game buttons
 for i, gameName in ipairs(games) do
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, 50)
@@ -191,17 +194,15 @@ for i, gameName in ipairs(games) do
     Instance.new("UIStroke", btn).Thickness = 1
     btn.Parent = scrollFrame
 
-    btn.MouseEnter:Connect(function()
-        btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    end)
-    btn.MouseLeave:Connect(function()
-        btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    end)
+    btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70) end)
+    btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50) end)
 
     btn.MouseButton1Click:Connect(function()
         if mainFrame:FindFirstChild("GameSubGui") then
             mainFrame.GameSubGui:Destroy()
         end
+
+        -- Sub-GUI container
         local sub = Instance.new("Frame", mainFrame)
         sub.Name = "GameSubGui"
         sub.Size = UDim2.new(0, 300, 0, 240)
@@ -211,98 +212,118 @@ for i, gameName in ipairs(games) do
         sub.Draggable = true
         Instance.new("UICorner", sub).CornerRadius = UDim.new(0, 8)
 
+        -- Fixed close button
         local closeSub = Instance.new("TextButton", sub)
         closeSub.Text = "X"
         closeSub.Size = UDim2.new(0, 30, 0, 30)
-        closeSub.Position = UDim2.new(1, -30, 0, 0)
+        closeSub.Position = UDim2.new(1, -35, 0, 5)
         closeSub.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
         closeSub.TextColor3 = Color3.fromRGB(255, 255, 255)
+        closeSub.Font = Enum.Font.GothamBold
+        closeSub.TextSize = 18
+        closeSub.AutoButtonColor = false
         Instance.new("UICorner", closeSub).CornerRadius = UDim.new(0, 6)
         closeSub.MouseButton1Click:Connect(function()
             sub:Destroy()
         end)
 
-        -- Populate scripts
+        -- ScrollingFrame for scripts
+        local scr = Instance.new("ScrollingFrame", sub)
+        scr.Name = "ScriptList"
+        scr.Size = UDim2.new(1, -20, 1, -50)
+        scr.Position = UDim2.new(0, 10, 0, 40)
+        scr.BackgroundTransparency = 1
+        scr.ScrollBarThickness = 6
+        scr.ClipsDescendants = true
+        scr.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+        -- Padding & layout
+        local pad = Instance.new("UIPadding", scr)
+        pad.PaddingTop = UDim.new(0, 8)
+        pad.PaddingBottom = UDim.new(0, 8)
+        pad.PaddingLeft = UDim.new(0, 8)
+        pad.PaddingRight = UDim.new(0, 8)
+        local list = Instance.new("UIListLayout", scr)
+        list.SortOrder = Enum.SortOrder.LayoutOrder
+        list.Padding = UDim.new(0, 10)
+        scr:SetAttribute("NextOrder", 1)
+
+        -- Populate based on selection
         if gameName == "DEAD RAILS" then
-            addScriptButton(sub, "Null-Fire", 40, function()
+            addScriptButton(scr, "Null-Fire", function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScripts/Null-Fire/main/Loader"))()
             end)
-            addScriptButton(sub, "Toggleable Aimlock", 90, function()
+            addScriptButton(scr, "Toggleable Aimlock", function()
                 loadstring(game:HttpGet("https://rawscripts.net/raw/Dead-Rails-Alpha-Alpha-Aimbot-with-bind-30004"))()
             end)
-            addScriptButton(sub, "OP Auto Bonds", 140, function()
+            addScriptButton(scr, "OP Auto Bonds", function()
                 getgenv().BondFarmSetting = {
-                    tweenDuration = 20,
-                    AutoExecute = true,
-                    queue_on_teleport = true,
-                    CheckMissedBonds = true
+                    tweenDuration = 20, AutoExecute = true,
+                    queue_on_teleport = true, CheckMissedBonds = true
                 }
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/DonjoScripts/Public-Scripts/refs/heads/Slap-Battles/TheFastestBondStealer.lua"))()
             end)
-            addScriptButton(sub, "Airweld", 190, function()
+            addScriptButton(scr, "Airweld", function()
                 notify("Key: Ringta")
-                notify("Airweld Running...")
-                wait(2)
-                loadstring(game:HttpGet('https://raw.githubusercontent.com/hbjrev/airweld.github.io/refs/heads/main/RINGTA.lua'))()
-                notify("Airweld Loaded!")
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/hbjrev/airweld.github.io/refs/heads/main/RINGTA.lua"))()
             end)
 
         elseif gameName == "BLADE BALL" then
-            addScriptButton(sub, "OP Auto Parry & Auto Spam", 40, function()
+            addScriptButton(scr, "OP Auto Parry & Auto Spam", function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Zypherion-X19/Zy/refs/heads/main/Blade-Ball.lua"))()
             end)
 
         elseif gameName == "GROW A GARDEN" then
-            addScriptButton(sub, "Ronix", 40, function()
+            addScriptButton(scr, "Ronix", function()
                 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/a8f02a61fc38bf9256dd0f17be6b16d7.lua"))()
             end)
 
         elseif gameName == "FISCH" then
-            addScriptButton(sub, "Nathub", 40, function()
+            addScriptButton(scr, "Nathub", function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/ArdyBotzz/NatHub/refs/heads/master/NatHub.lua"))()
             end)
-            addScriptButton(sub, "Beecon Hub", 90, function()
+            addScriptButton(scr, "Beecon Hub", function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/BaconBossScript/BeeconHub/main/BeeconHub"))()
             end)
 
         elseif gameName == "BLOX FRUITS" then
-            addScriptButton(sub, "Vxeze", 40, function()
+            addScriptButton(scr, "Vxeze", function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Dex-Bear/Vxezehub/refs/heads/main/VxezeHubMain"))()
             end)
 
         elseif gameName == "BLUE LOCK: RIVALS" then
-            addScriptButton(sub, "Fearise Hub", 40, function()
+            addScriptButton(scr, "Fearise Hub", function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/EnesXVC/Games-Scripts/main/Blue-Lock-Fearise-Hub"))()
             end)
 
         elseif gameName == "Universal Scripts" then
-            addScriptButton(sub, "Infinite Yield", 40, function()
+            addScriptButton(scr, "Infinite Yield", function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
             end)
 
         elseif gameName == "Universal Hubs" then
-            addScriptButton(sub, "Ghost Hub", 40, function()
+            addScriptButton(scr, "Ghost Hub", function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/main/GhostHub"))()
             end)
 
         elseif gameName == "Any DH Games" then
-            addScriptButton(sub, "Camlock", 40, function()
+            addScriptButton(scr, "Camlock", function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/CookieScript/Fixscript/refs/heads/main/Psalmsfix"))()
             end)
-            addScriptButton(sub, "Silent Aim", 90, function()
+            addScriptButton(scr, "Silent Aim", function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/DaddyFelixFucks/TappingSilent/refs/heads/main/SilentAim", true))()
             end)
-            addScriptButton(sub, "Anti Lock", 140, function()
-                loadstring(game:HttpGet('https://raw.githubusercontent.com/wenny69420/KirbswareScripts/main/MobileV3'))()
+            addScriptButton(scr, "Anti Lock", function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/wenny69420/KirbswareScripts/main/MobileV3"))()
             end)
 
         elseif gameName == "Murder Mystery 2" then
-            addScriptButton(sub, "YARHM", 40, function()
+            addScriptButton(scr, "YARHM", function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Joystickplays/psychic-octo-invention/main/yarhm.lua", false))()
             end)
 
         elseif gameName == "ARSENAL" then
-            addScriptButton(sub, "QUOTAS HUB (OP)", 40, function()
+            addScriptButton(scr, "QUOTAS HUB (OP)", function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Insertl/QuotasHub/main/BETAv1.3"))()
             end)
         end
