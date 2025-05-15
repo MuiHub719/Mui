@@ -22,12 +22,6 @@ do
     stroke.Color = Color3.fromRGB(80, 80, 80)
     stroke.Thickness = 2
 end
-toggleButton.MouseEnter:Connect(function()
-    toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-end)
-toggleButton.MouseLeave:Connect(function()
-    toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-end)
 
 -- Create Main GUI
 local mainGui = Instance.new("ScreenGui", playerGui)
@@ -36,8 +30,8 @@ mainGui.Enabled = false
 mainGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame", mainGui)
-mainFrame.Size = UDim2.new(0, 420, 0, 380)
-mainFrame.Position = UDim2.new(0.5, -210, 0.5, -190)
+mainFrame.Size = UDim2.new(0, 420, 0, 420)
+mainFrame.Position = UDim2.new(0.5, -210, 0.5, -210)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -49,18 +43,16 @@ do
     stroke.Thickness = 2
 end
 
--- Gradient Header
+-- Header
 local header = Instance.new("Frame", mainFrame)
 header.Size = UDim2.new(1, 0, 0, 40)
 header.BackgroundTransparency = 1
-do
-    local grad = Instance.new("UIGradient", header)
-    grad.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 100, 100)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 200, 100))
-    }
-    grad.Rotation = 90
-end
+local grad = Instance.new("UIGradient", header)
+grad.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 100, 100)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 200, 100))
+}
+grad.Rotation = 90
 
 local title = Instance.new("TextLabel", header)
 title.Text = "MUI HUB"
@@ -69,14 +61,6 @@ title.BackgroundTransparency = 1
 title.TextColor3 = Color3.fromRGB(240, 240, 240)
 title.Font = Enum.Font.GothamBlack
 title.TextSize = 24
-spawn(function()
-    while true do
-        for i = 0, 1, 0.01 do
-            title.TextColor3 = Color3.fromHSV(i, 1, 1)
-            wait()
-        end
-    end
-end)
 
 -- Close Button (DESTROYS)
 local closeButton = Instance.new("TextButton", header)
@@ -94,6 +78,30 @@ closeButton.MouseButton1Click:Connect(function()
     toggleGui:Destroy()
 end)
 
+-- Theme toggle
+local themeBtn = Instance.new("TextButton", header)
+themeBtn.Size = UDim2.new(0, 60, 0, 30)
+themeBtn.Position = UDim2.new(0, 10, 0, 5)
+themeBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+themeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+themeBtn.Font = Enum.Font.GothamSemibold
+themeBtn.TextSize = 16
+Instance.new("UICorner", themeBtn).CornerRadius = UDim.new(0, 6)
+
+local darkTheme = true
+themeBtn.Text = "Light"
+
+themeBtn.MouseButton1Click:Connect(function()
+    darkTheme = not darkTheme
+    if darkTheme then
+        mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        themeBtn.Text = "Light"
+    else
+        mainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+        themeBtn.Text = "Dark"
+    end
+end)
+
 -- Scrollable container for game buttons
 local scrollFrame = Instance.new("ScrollingFrame", mainFrame)
 scrollFrame.Name = "GameList"
@@ -109,7 +117,7 @@ grid.CellSize = UDim2.new(0, 180, 0, 50)
 grid.CellPadding = UDim2.new(0, 15, 0, 15)
 grid.SortOrder = Enum.SortOrder.LayoutOrder
 
--- List of games
+-- Game list
 local games = {
     "GROW A GARDEN",
     "FISCH",
@@ -122,16 +130,16 @@ local games = {
     "Any DH Games"
 }
 
--- Helper: notification
-local function notify(title, text)
+-- Utility: notification
+local function notify(msg)
     game.StarterGui:SetCore("SendNotification", {
-        Title = title;
-        Text = text;
+        Title = "MUI HUB";
+        Text = msg;
         Duration = 2;
     })
 end
 
--- Helper: add script buttons (with wait+notifications)
+-- Helper to add script buttons
 local function addScriptButton(parent, text, yPos, action)
     local b = Instance.new("TextButton", parent)
     b.Size = UDim2.new(0, 260, 0, 40)
@@ -143,10 +151,10 @@ local function addScriptButton(parent, text, yPos, action)
     b.TextSize = 18
     Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
     b.MouseButton1Click:Connect(function()
-        notify("Script Running", text)
+        notify(text .. " Running...")
         wait(2)
         action()
-        notify("Script Loaded", text)
+        notify(text .. " Loaded!")
     end)
 end
 
@@ -176,17 +184,16 @@ for i, gameName in ipairs(games) do
         if mainFrame:FindFirstChild("GameSubGui") then
             mainFrame.GameSubGui:Destroy()
         end
+        local sub = Instance.new("Frame", mainFrame)
+        sub.Name = "GameSubGui"
+        sub.Size = UDim2.new(0, 300, 0, 200)
+        sub.Position = UDim2.new(0.5, -150, 0.5, -100)
+        sub.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        sub.Active = true
+        sub.Draggable = true
+        Instance.new("UICorner", sub).CornerRadius = UDim.new(0, 8)
 
-        local subGui = Instance.new("Frame", mainFrame)
-        subGui.Name = "GameSubGui"
-        subGui.Size = UDim2.new(0, 300, 0, 200)
-        subGui.Position = UDim2.new(0.5, -150, 0.5, -100)
-        subGui.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        subGui.Active = true
-        subGui.Draggable = true
-        Instance.new("UICorner", subGui).CornerRadius = UDim.new(0, 8)
-
-        local closeSub = Instance.new("TextButton", subGui)
+        local closeSub = Instance.new("TextButton", sub)
         closeSub.Text = "X"
         closeSub.Size = UDim2.new(0, 30, 0, 30)
         closeSub.Position = UDim2.new(1, -30, 0, 0)
@@ -194,17 +201,18 @@ for i, gameName in ipairs(games) do
         closeSub.TextColor3 = Color3.fromRGB(255, 255, 255)
         Instance.new("UICorner", closeSub).CornerRadius = UDim.new(0, 6)
         closeSub.MouseButton1Click:Connect(function()
-            subGui:Destroy()
+            sub:Destroy()
         end)
 
+        -- Populate scripts
         if gameName == "DEAD RAILS" then
-            addScriptButton(subGui, "Null-Fire",          40, function()
+            addScriptButton(sub, "Null-Fire", 40, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScripts/Null-Fire/main/Loader"))()
             end)
-            addScriptButton(subGui, "Toggleable Aimlock", 90, function()
+            addScriptButton(sub, "Toggleable Aimlock", 90, function()
                 loadstring(game:HttpGet("https://rawscripts.net/raw/Dead-Rails-Alpha-Alpha-Aimbot-with-bind-30004"))()
             end)
-            addScriptButton(subGui, "OP Auto Bonds",     140, function()
+            addScriptButton(sub, "OP Auto Bonds", 140, function()
                 getgenv().BondFarmSetting = {
                     tweenDuration = 20,
                     AutoExecute = true,
@@ -215,48 +223,48 @@ for i, gameName in ipairs(games) do
             end)
 
         elseif gameName == "BLADE BALL" then
-            addScriptButton(subGui, "OP Auto Parry & Auto Spam", 50, function()
+            addScriptButton(sub, "OP Auto Parry & Auto Spam", 50, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Zypherion-X19/Zy/refs/heads/main/Blade-Ball.lua"))()
             end)
 
         elseif gameName == "GROW A GARDEN" then
-            addScriptButton(subGui, "Ronix", 50, function()
+            addScriptButton(sub, "Ronix", 50, function()
                 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/a8f02a61fc38bf9256dd0f17be6b16d7.lua"))()
             end)
 
         elseif gameName == "FISCH" then
-            addScriptButton(subGui, "Nathub",    50, function()
+            addScriptButton(sub, "Nathub", 50, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/ArdyBotzz/NatHub/refs/heads/master/NatHub.lua"))()
             end)
-            addScriptButton(subGui, "Beecon Hub",100, function()
+            addScriptButton(sub, "Beecon Hub", 100, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/BaconBossScript/BeeconHub/main/BeeconHub"))()
             end)
 
         elseif gameName == "BLOX FRUITS" then
-            addScriptButton(subGui, "Vxeze", 50, function()
+            addScriptButton(sub, "Vxeze", 50, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Dex-Bear/Vxezehub/refs/heads/main/VxezeHubMain"))()
             end)
 
         elseif gameName == "BLUE LOCK: RIVALS" then
-            addScriptButton(subGui, "Fearise Hub", 50, function()
+            addScriptButton(sub, "Fearise Hub", 50, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/EnesXVC/Games-Scripts/main/Blue-Lock-Fearise-Hub"))()
             end)
 
         elseif gameName == "Universal Scripts" then
-            addScriptButton(subGui, "Infinite Yield", 50, function()
+            addScriptButton(sub, "Infinite Yield", 50, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
             end)
 
         elseif gameName == "Universal Hubs" then
-            addScriptButton(subGui, "Ghost Hub", 50, function()
+            addScriptButton(sub, "Ghost Hub", 50, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/main/GhostHub"))()
             end)
 
         elseif gameName == "Any DH Games" then
-            addScriptButton(subGui, "Camlock",    50, function()
+            addScriptButton(sub, "Camlock", 50, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/CookieScript/Fixscript/refs/heads/main/Psalmsfix"))()
             end)
-            addScriptButton(subGui, "Silent Aim", 100, function()
+            addScriptButton(sub, "Silent Aim", 100, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/DaddyFelixFucks/TappingSilent/refs/heads/main/SilentAim", true))()
             end)
         end
