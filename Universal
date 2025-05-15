@@ -81,7 +81,7 @@ end)
 local destroyButton = Instance.new("TextButton", header)
 destroyButton.Text = "Destroy"
 destroyButton.Size = UDim2.new(0, 70, 0, 30)
-destroyButton.Position = UDim2.new(1, -115, 0, 5) -- Left of close button
+destroyButton.Position = UDim2.new(1, -115, 0, 5)
 destroyButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 destroyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 destroyButton.Font = Enum.Font.GothamBold
@@ -105,7 +105,6 @@ Instance.new("UICorner", themeBtn).CornerRadius = UDim.new(0, 6)
 
 local darkTheme = true
 themeBtn.Text = "Light"
-
 themeBtn.MouseButton1Click:Connect(function()
     darkTheme = not darkTheme
     if darkTheme then
@@ -144,7 +143,8 @@ local games = {
     "BLUE LOCK: RIVALS",
     "Universal Scripts",
     "Universal Hubs",
-    "Any DH Games"
+    "Any DH Games",
+    "Murder Mystery 2"
 }
 
 -- Utility: notification
@@ -201,6 +201,8 @@ for i, gameName in ipairs(games) do
         if mainFrame:FindFirstChild("GameSubGui") then
             mainFrame.GameSubGui:Destroy()
         end
+
+        -- Sub‐GUI container
         local sub = Instance.new("Frame", mainFrame)
         sub.Name = "GameSubGui"
         sub.Size = UDim2.new(0, 300, 0, 200)
@@ -210,26 +212,42 @@ for i, gameName in ipairs(games) do
         sub.Draggable = true
         Instance.new("UICorner", sub).CornerRadius = UDim.new(0, 8)
 
+        -- Scrollable inside sub
+        local inner = Instance.new("ScrollingFrame", sub)
+        inner.Size = UDim2.new(1, -20, 1, -40)
+        inner.Position = UDim2.new(0, 10, 0, 30)
+        inner.BackgroundTransparency = 1
+        inner.ScrollBarThickness = 6
+        inner.ClipsDescendants = true
+        inner.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+        local list = Instance.new("UIListLayout", inner)
+        list.Padding = UDim.new(0, 10)
+        list.SortOrder = Enum.SortOrder.LayoutOrder
+
+        -- Close sub‐GUI
         local closeSub = Instance.new("TextButton", sub)
         closeSub.Text = "X"
         closeSub.Size = UDim2.new(0, 30, 0, 30)
-        closeSub.Position = UDim2.new(1, -30, 0, 0)
+        closeSub.Position = UDim2.new(1, -35, 0, 5)
         closeSub.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
         closeSub.TextColor3 = Color3.fromRGB(255, 255, 255)
+        closeSub.Font = Enum.Font.GothamBold
+        closeSub.TextSize = 16
         Instance.new("UICorner", closeSub).CornerRadius = UDim.new(0, 6)
         closeSub.MouseButton1Click:Connect(function()
             sub:Destroy()
         end)
 
-        -- Populate scripts
+        -- Populate scripts per game
         if gameName == "DEAD RAILS" then
-            addScriptButton(sub, "Null-Fire", 40, function()
+            addScriptButton(inner, "Null-Fire",          0, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScripts/Null-Fire/main/Loader"))()
             end)
-            addScriptButton(sub, "Toggleable Aimlock", 90, function()
+            addScriptButton(inner, "Toggleable Aimlock", 0, function()
                 loadstring(game:HttpGet("https://rawscripts.net/raw/Dead-Rails-Alpha-Alpha-Aimbot-with-bind-30004"))()
             end)
-            addScriptButton(sub, "OP Auto Bonds", 140, function()
+            addScriptButton(inner, "OP Auto Bonds",     0, function()
                 getgenv().BondFarmSetting = {
                     tweenDuration = 20,
                     AutoExecute = true,
@@ -238,51 +256,62 @@ for i, gameName in ipairs(games) do
                 }
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/DonjoScripts/Public-Scripts/refs/heads/Slap-Battles/TheFastestBondStealer.lua"))()
             end)
+            -- Airweld
+            addScriptButton(inner, "Airweld", 0, function()
+                notify("Key: Ringta")
+                wait(2)
+                loadstring(game:HttpGet('https://raw.githubusercontent.com/hbjrev/airweld.github.io/refs/heads/main/RINGTA.lua'))()
+            end)
 
         elseif gameName == "BLADE BALL" then
-            addScriptButton(sub, "OP Auto Parry & Auto Spam", 50, function()
+            addScriptButton(inner, "OP Auto Parry & Auto Spam", 0, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Zypherion-X19/Zy/refs/heads/main/Blade-Ball.lua"))()
             end)
 
         elseif gameName == "GROW A GARDEN" then
-            addScriptButton(sub, "Ronix", 50, function()
+            addScriptButton(inner, "Ronix", 0, function()
                 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/a8f02a61fc38bf9256dd0f17be6b16d7.lua"))()
             end)
 
         elseif gameName == "FISCH" then
-            addScriptButton(sub, "Nathub", 50, function()
+            addScriptButton(inner, "Nathub", 0, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/ArdyBotzz/NatHub/refs/heads/master/NatHub.lua"))()
             end)
-            addScriptButton(sub, "Beecon Hub", 100, function()
+            addScriptButton(inner, "Beecon Hub", 0, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/BaconBossScript/BeeconHub/main/BeeconHub"))()
             end)
 
         elseif gameName == "BLOX FRUITS" then
-            addScriptButton(sub, "Vxeze", 50, function()
+            addScriptButton(inner, "Vxeze", 0, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Dex-Bear/Vxezehub/refs/heads/main/VxezeHubMain"))()
             end)
 
         elseif gameName == "BLUE LOCK: RIVALS" then
-            addScriptButton(sub, "Fearise Hub", 50, function()
+            addScriptButton(inner, "Fearise Hub", 0, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/EnesXVC/Games-Scripts/main/Blue-Lock-Fearise-Hub"))()
             end)
 
         elseif gameName == "Universal Scripts" then
-            addScriptButton(sub, "Infinite Yield", 50, function()
+            addScriptButton(inner, "Infinite Yield", 0, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
             end)
 
         elseif gameName == "Universal Hubs" then
-            addScriptButton(sub, "Ghost Hub", 50, function()
+            addScriptButton(inner, "Ghost Hub", 0, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/main/GhostHub"))()
             end)
 
         elseif gameName == "Any DH Games" then
-            addScriptButton(sub, "Camlock", 50, function()
+            addScriptButton(inner, "Camlock", 0, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/CookieScript/Fixscript/refs/heads/main/Psalmsfix"))()
             end)
-            addScriptButton(sub, "Silent Aim", 100, function()
+            addScriptButton(inner, "Silent Aim", 0, function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/DaddyFelixFucks/TappingSilent/refs/heads/main/SilentAim", true))()
+            end)
+
+        elseif gameName == "Murder Mystery 2" then
+            addScriptButton(inner, "YARHM", 0, function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/Joystickplays/psychic-octo-invention/main/yarhm.lua", false))()
             end)
         end
     end)
