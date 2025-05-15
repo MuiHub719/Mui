@@ -58,13 +58,13 @@ local title = Instance.new("TextLabel", header)
 title.Text = "MUI HUB"
 title.Size = UDim2.new(1, 0, 1, 0)
 title.BackgroundTransparency = 1
-title.TextColor3 = Color3.fromRGB(240, 240, 240)  -- Default white for dark mode
+title.TextColor3 = Color3.fromRGB(240, 240, 240)
 title.Font = Enum.Font.GothamBlack
 title.TextSize = 24
 
--- Close Button (DESTROYS)
+-- Close Button (just closes)
 local closeButton = Instance.new("TextButton", header)
-closeButton.Text = "✕"
+closeButton.Text = "X"
 closeButton.Size = UDim2.new(0, 30, 0, 30)
 closeButton.Position = UDim2.new(1, -35, 0, 5)
 closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
@@ -74,6 +74,21 @@ closeButton.TextSize = 18
 closeButton.AutoButtonColor = false
 Instance.new("UICorner", closeButton).CornerRadius = UDim.new(0, 8)
 closeButton.MouseButton1Click:Connect(function()
+    mainGui.Enabled = false
+end)
+
+-- Destroy Button (new)
+local destroyButton = Instance.new("TextButton", header)
+destroyButton.Text = "Destroy"
+destroyButton.Size = UDim2.new(0, 70, 0, 30)
+destroyButton.Position = UDim2.new(1, -115, 0, 5) -- Left of close button
+destroyButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+destroyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+destroyButton.Font = Enum.Font.GothamBold
+destroyButton.TextSize = 18
+destroyButton.AutoButtonColor = false
+Instance.new("UICorner", destroyButton).CornerRadius = UDim.new(0, 8)
+destroyButton.MouseButton1Click:Connect(function()
     mainGui:Destroy()
     toggleGui:Destroy()
 end)
@@ -95,11 +110,11 @@ themeBtn.MouseButton1Click:Connect(function()
     darkTheme = not darkTheme
     if darkTheme then
         mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        title.TextColor3 = Color3.fromRGB(240, 240, 240)  -- White text for dark
+        title.TextColor3 = Color3.fromRGB(240, 240, 240)
         themeBtn.Text = "Light"
     else
         mainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
-        title.TextColor3 = Color3.fromRGB(0, 0, 0)        -- Black text for light
+        title.TextColor3 = Color3.fromRGB(0, 0, 0)
         themeBtn.Text = "Dark"
     end
 end)
