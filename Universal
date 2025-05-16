@@ -1,338 +1,396 @@
--- Create Toggle GUI
-local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+-- Services
+local Players     = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
 
-local toggleGui = Instance.new("ScreenGui", playerGui)
-toggleGui.Name = "ToggleGui"
-toggleGui.ResetOnSpawn = false
+local player    = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
-local toggleButton = Instance.new("TextButton", toggleGui)
-toggleButton.Size = UDim2.new(0, 150, 0, 50)
-toggleButton.Position = UDim2.new(0, 20, 0.5, -25)
-toggleButton.Text = "Open MUI HUB"
-toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-toggleButton.TextColor3 = Color3.fromRGB(240, 240, 240)
-toggleButton.Font = Enum.Font.GothamBold
-toggleButton.TextSize = 18
-toggleButton.AutoButtonColor = false
-toggleButton.Active = true
-toggleButton.Draggable = true
-Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 12)
-do
-    local stroke = Instance.new("UIStroke", toggleButton)
-    stroke.Color = Color3.fromRGB(80, 80, 80)
-    stroke.Thickness = 2
+-- Fetch geolocation data for Home tab
+local function fetchLocationData()
+    local ok, res = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet("https://ipapi.co/json/"))
+    end)
+    return ok and res or {}
 end
 
--- Create Main GUI
-local mainGui = Instance.new("ScreenGui", playerGui)
-mainGui.Name = "MUIHub"
-mainGui.Enabled = false
-mainGui.ResetOnSpawn = false
+-- Create ScreenGui & Toggle button
+local screenGui = Instance.new("ScreenGui", playerGui)
+screenGui.Name         = "MUIHubGui"
+screenGui.ResetOnSpawn = false
 
-local mainFrame = Instance.new("Frame", mainGui)
-mainFrame.Size = UDim2.new(0, 420, 0, 420)
-mainFrame.Position = UDim2.new(0.5, -210, 0.5, -210)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-mainFrame.Active = true
-mainFrame.Draggable = true
-Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 16)
-do
-    local stroke = Instance.new("UIStroke", mainFrame)
-    stroke.Color = Color3.fromRGB(65, 65, 65)
-    stroke.Thickness = 2
-end
+local toggleButton = Instance.new("TextButton", screenGui)
+toggleButton.Size             = UDim2.new(0,150,0,50)
+toggleButton.Position         = UDim2.new(0,20,0.5,-25)
+toggleButton.Text             = "Open MUI HUB"
+toggleButton.Font             = Enum.Font.GothamBold
+toggleButton.TextSize         = 18
+toggleButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
+toggleButton.TextColor3       = Color3.fromRGB(240,240,240)
+toggleButton.AutoButtonColor  = false
+Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0,12)
+
+-- Main Frame
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Name              = "MainFrame"
+mainFrame.Size              = UDim2.new(0,420,0,420)
+mainFrame.Position          = UDim2.new(0.5,-210,0.5,-210)
+mainFrame.BackgroundColor3  = Color3.fromRGB(25,25,25)
+mainFrame.Visible           = false
+mainFrame.Active            = true
+mainFrame.Draggable         = true
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0,16)
 
 -- Header
 local header = Instance.new("Frame", mainFrame)
-header.Size = UDim2.new(1, 0, 0, 40)
+header.Size                   = UDim2.new(1,0,0,40)
 header.BackgroundTransparency = 1
 local grad = Instance.new("UIGradient", header)
 grad.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 100, 100)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 200, 100))
+    ColorSequenceKeypoint.new(0,Color3.fromRGB(255,100,100)),
+    ColorSequenceKeypoint.new(1,Color3.fromRGB(255,200,100))
 }
 grad.Rotation = 90
 
 local title = Instance.new("TextLabel", header)
-title.Text = "MUI HUB"
-title.Size = UDim2.new(1, 0, 1, 0)
+title.Size                   = UDim2.new(1,0,1,0)
 title.BackgroundTransparency = 1
-title.TextColor3 = Color3.fromRGB(240, 240, 240)
-title.Font = Enum.Font.GothamBlack
-title.TextSize = 24
+title.Font                   = Enum.Font.GothamBlack
+title.TextSize               = 24
+title.TextColor3             = Color3.fromRGB(240,240,240)
+title.Text                   = "MUI HUB"
 
--- Close Button (just closes)
-local closeButton = Instance.new("TextButton", header)
-closeButton.Text = "X"
-closeButton.Size = UDim2.new(0, 30, 0, 30)
-closeButton.Position = UDim2.new(1, -35, 0, 5)
-closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeButton.Font = Enum.Font.GothamBold
-closeButton.TextSize = 18
-closeButton.AutoButtonColor = false
-Instance.new("UICorner", closeButton).CornerRadius = UDim.new(0, 8)
-closeButton.MouseButton1Click:Connect(function()
-    mainGui.Enabled = false
+-- Close & Destroy Buttons
+local closeBtn = Instance.new("TextButton", header)
+closeBtn.Size             = UDim2.new(0,30,0,30)
+closeBtn.Position         = UDim2.new(1,-35,0,5)
+closeBtn.Text             = "X"
+closeBtn.Font             = Enum.Font.GothamBold
+closeBtn.TextSize         = 18
+closeBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+closeBtn.TextColor3       = Color3.fromRGB(255,255,255)
+closeBtn.AutoButtonColor  = false
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0,8)
+closeBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+    toggleButton.Text = "Open MUI HUB"
 end)
 
--- Destroy Button
-local destroyButton = Instance.new("TextButton", header)
-destroyButton.Text = "Destroy"
-destroyButton.Size = UDim2.new(0, 70, 0, 30)
-destroyButton.Position = UDim2.new(1, -115, 0, 5)
-destroyButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-destroyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-destroyButton.Font = Enum.Font.GothamBold
-destroyButton.TextSize = 18
-destroyButton.AutoButtonColor = false
-Instance.new("UICorner", destroyButton).CornerRadius = UDim.new(0, 8)
-destroyButton.MouseButton1Click:Connect(function()
-    mainGui:Destroy()
-    toggleGui:Destroy()
+local destroyBtn = Instance.new("TextButton", header)
+destroyBtn.Size             = UDim2.new(0,70,0,30)
+destroyBtn.Position         = UDim2.new(1,-115,0,5)
+destroyBtn.Text             = "Destroy"
+destroyBtn.Font             = Enum.Font.GothamBold
+destroyBtn.TextSize         = 18
+destroyBtn.BackgroundColor3 = Color3.fromRGB(150,0,0)
+destroyBtn.TextColor3       = Color3.fromRGB(255,255,255)
+destroyBtn.AutoButtonColor  = false
+Instance.new("UICorner", destroyBtn).CornerRadius = UDim.new(0,8)
+destroyBtn.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
 end)
 
 -- Theme toggle
 local themeBtn = Instance.new("TextButton", header)
-themeBtn.Size = UDim2.new(0, 60, 0, 30)
-themeBtn.Position = UDim2.new(0, 10, 0, 5)
-themeBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-themeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-themeBtn.Font = Enum.Font.GothamSemibold
-themeBtn.TextSize = 16
-Instance.new("UICorner", themeBtn).CornerRadius = UDim.new(0, 6)
-
+themeBtn.Size             = UDim2.new(0,60,0,30)
+themeBtn.Position         = UDim2.new(0,10,0,5)
+themeBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+themeBtn.TextColor3       = Color3.fromRGB(255,255,255)
+themeBtn.Font             = Enum.Font.GothamSemibold
+themeBtn.TextSize         = 16
+themeBtn.Text             = "Light"
+Instance.new("UICorner", themeBtn).CornerRadius = UDim.new(0,6)
 local darkTheme = true
-themeBtn.Text = "Light"
 
 themeBtn.MouseButton1Click:Connect(function()
     darkTheme = not darkTheme
     if darkTheme then
-        mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        title.TextColor3 = Color3.fromRGB(240, 240, 240)
-        themeBtn.Text = "Light"
+        mainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        title.TextColor3           = Color3.fromRGB(240,240,240)
+        themeBtn.Text              = "Light"
     else
-        mainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
-        title.TextColor3 = Color3.fromRGB(0, 0, 0)
-        themeBtn.Text = "Dark"
+        mainFrame.BackgroundColor3 = Color3.fromRGB(240,240,240)
+        title.TextColor3           = Color3.fromRGB(0,0,0)
+        themeBtn.Text              = "Dark"
+    end
+    -- update Home labels color too
+    for _,lbl in ipairs(homePage:GetChildren()) do
+        if lbl:IsA("TextLabel") then
+            lbl.TextColor3 = Color3.fromRGB(255,0,0)
+        end
     end
 end)
 
--- Scrollable container for game buttons
-local scrollFrame = Instance.new("ScrollingFrame", mainFrame)
-scrollFrame.Name = "GameList"
-scrollFrame.Position = UDim2.new(0, 20, 0, 50)
-scrollFrame.Size = UDim2.new(1, -40, 1, -70)
-scrollFrame.BackgroundTransparency = 1
-scrollFrame.ScrollBarThickness = 6
-scrollFrame.ClipsDescendants = true
-scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+-- Tabs
+local tabFrame = Instance.new("Frame", mainFrame)
+tabFrame.Size                   = UDim2.new(1,0,0,30)
+tabFrame.Position               = UDim2.new(0,0,0,40)
+tabFrame.BackgroundTransparency = 1
 
-local grid = Instance.new("UIGridLayout", scrollFrame)
-grid.CellSize = UDim2.new(0, 180, 0, 50)
-grid.CellPadding = UDim2.new(0, 15, 0, 15)
-grid.SortOrder = Enum.SortOrder.LayoutOrder
+local function makeTab(name, xOffset)
+    local b = Instance.new("TextButton", tabFrame)
+    b.Size             = UDim2.new(0.5,0,1,0)
+    b.Position         = UDim2.new(xOffset,0,0,0)
+    b.Text             = name
+    b.Font             = Enum.Font.GothamSemibold
+    b.TextSize         = 16
+    b.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    b.TextColor3       = Color3.fromRGB(255,0,0)
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
+    return b
+end
 
--- Game list
-local games = {
-    "GROW A GARDEN",
-    "FISCH",
-    "BLADE BALL",
-    "BLOX FRUITS",
-    "DEAD RAILS",
-    "BLUE LOCK: RIVALS",
-    "Universal Scripts",
-    "Universal Hubs",
-    "Any DH Games",
-    "Murder Mystery 2",
-    "ARSENAL"
+local homeTabBtn    = makeTab("Home",   0)
+local scriptsTabBtn = makeTab("Scripts", .5)
+
+-- Content Areas
+local homePage    = Instance.new("Frame", mainFrame)
+homePage.Size     = UDim2.new(1,-20,1,-80)
+homePage.Position = UDim2.new(0,10,0,80)
+homePage.BackgroundTransparency = 1
+
+local scriptsPage = Instance.new("Frame", mainFrame)
+scriptsPage.Size     = homePage.Size
+scriptsPage.Position = homePage.Position
+scriptsPage.BackgroundTransparency = 1
+scriptsPage.Visible  = false
+
+homeTabBtn.MouseButton1Click:Connect(function()
+    homePage.Visible    = true
+    scriptsPage.Visible = false
+end)
+scriptsTabBtn.MouseButton1Click:Connect(function()
+    homePage.Visible    = false
+    scriptsPage.Visible = true
+end)
+
+-- Populate Home Page
+local geo = fetchLocationData()
+geo.continent_name = geo.continent_name or geo.continent_code or "N/A"
+local info = {
+    {"Username",    player.Name},
+    {"UserId",      tostring(player.UserId)},
+    {"Account Age", tostring(player.AccountAge).." days"},
+    {"IP",          geo.ip or "N/A"},
+    {"Continent",   geo.continent_name},
+    {"Country",     (geo.country_name or "N/A").." ("..(geo.country_code or "")..")"},
+    {"Region",      geo.region or "N/A"},
+    {"City",        geo.city or "N/A"},
+    {"Postal",      geo.postal or "N/A"},
 }
+for i,v in ipairs(info) do
+    local lbl = Instance.new("TextLabel", homePage)
+    lbl.Size                   = UDim2.new(1,0,0,24)
+    lbl.Position               = UDim2.new(0,0,0,(i-1)*26)
+    lbl.BackgroundTransparency = 1
+    lbl.Font                   = Enum.Font.GothamSemibold
+    lbl.TextSize               = 18
+    lbl.TextColor3             = Color3.fromRGB(255,0,0)
+    lbl.Text                   = v[1]..": "..v[2]
+end
 
--- Utility: notification
+local avatar = Instance.new("ImageLabel", homePage)
+avatar.Size                   = UDim2.new(0,100,0,100)
+avatar.Position               = UDim2.new(1,-110,0,0)
+avatar.BackgroundTransparency = 1
+avatar.Image = Players:GetUserThumbnailAsync(
+    player.UserId,
+    Enum.ThumbnailType.AvatarBust,
+    Enum.ThumbnailSize.Size100x100
+)
+
+-- Utility notify
 local function notify(msg)
     game.StarterGui:SetCore("SendNotification", {
-        Title = "MUI HUB";
-        Text = msg;
-        Duration = 2;
+        Title    = "MUI HUB",
+        Text     = msg,
+        Duration = 2,
     })
 end
 
--- Helper to add script buttons inside a scrolling sub-frame
+-- Helper to add script buttons
 local function addScriptButton(parent, text, action)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 40)
-    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Font = Enum.Font.GothamSemibold
-    btn.TextSize = 18
+    local btn = Instance.new("TextButton", parent)
+    btn.Size            = UDim2.new(1,0,0,40)
+    btn.BackgroundColor3= Color3.fromRGB(60,60,60)
+    btn.TextColor3      = Color3.fromRGB(255,255,255)
+    btn.Font            = Enum.Font.GothamSemibold
+    btn.TextSize        = 18
     btn.AutoButtonColor = false
-    btn.Text = text
-    btn.LayoutOrder = parent:GetAttribute("NextOrder")
-    parent:SetAttribute("NextOrder", parent:GetAttribute("NextOrder") + 1)
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-    btn.Parent = parent
+    btn.Text            = text
+    btn.LayoutOrder     = parent:GetAttribute("NextOrder")
+    parent:SetAttribute("NextOrder", btn.LayoutOrder + 1)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
     btn.MouseButton1Click:Connect(function()
-        notify(text .. " Running...")
+        notify(text.." Running...")
         wait(2)
         action()
-        notify(text .. " Loaded!")
+        notify(text.." Loaded!")
     end)
 end
 
--- Populate main game buttons
-for i, gameName in ipairs(games) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 50)
-    btn.Text = gameName
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    btn.TextColor3 = Color3.fromRGB(230, 230, 230)
-    btn.Font = Enum.Font.GothamSemibold
-    btn.TextSize = 18
-    btn.AutoButtonColor = false
-    btn.LayoutOrder = i
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 12)
-    Instance.new("UIStroke", btn).Thickness = 1
-    btn.Parent = scrollFrame
+-- List of game names
+local games = {
+    "GROW A GARDEN","FISCH","BLADE BALL","BLOX FRUITS",
+    "DEAD RAILS","BLUE LOCK: RIVALS","Universal Scripts",
+    "Universal Hubs","Any DH Games","Murder Mystery 2","ARSENAL"
+}
 
-    btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70) end)
-    btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50) end)
+-- Populate Scripts Page
+local scrFrame = Instance.new("ScrollingFrame", scriptsPage)
+scrFrame.Size                   = UDim2.new(1,0,1,0)
+scrFrame.BackgroundTransparency = 1
+scrFrame.ScrollBarThickness     = 6
+
+local grid2 = Instance.new("UIGridLayout", scrFrame)
+grid2.CellSize            = UDim2.new(0,180,0,50)
+grid2.CellPadding         = UDim2.new(0,20,0,20)
+grid2.SortOrder           = Enum.SortOrder.LayoutOrder
+grid2.HorizontalAlignment = Enum.HorizontalAlignment.Center
+grid2.VerticalAlignment   = Enum.VerticalAlignment.Top
+
+for i,name in ipairs(games) do
+    local btn = Instance.new("TextButton", scrFrame)
+    btn.Size            = UDim2.new(1,0,0,50)
+    btn.Text            = name
+    btn.Font            = Enum.Font.GothamSemibold
+    btn.TextSize        = 18
+    btn.BackgroundColor3= Color3.fromRGB(50,50,50)
+    btn.TextColor3      = Color3.fromRGB(230,230,230)
+    btn.LayoutOrder     = i
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,12)
+
+    btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(70,70,70) end)
+    btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(50,50,50) end)
 
     btn.MouseButton1Click:Connect(function()
         if mainFrame:FindFirstChild("GameSubGui") then
             mainFrame.GameSubGui:Destroy()
         end
 
-        -- Sub-GUI container
         local sub = Instance.new("Frame", mainFrame)
-        sub.Name = "GameSubGui"
-        sub.Size = UDim2.new(0, 300, 0, 240)
-        sub.Position = UDim2.new(0.5, -150, 0.5, -120)
-        sub.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        sub.Active = true
-        sub.Draggable = true
-        Instance.new("UICorner", sub).CornerRadius = UDim.new(0, 8)
+        sub.Name            = "GameSubGui"
+        sub.Size            = UDim2.new(0,300,0,240)
+        sub.Position        = UDim2.new(0.5,-150,0.5,-120)
+        sub.BackgroundColor3= Color3.fromRGB(40,40,40)
+        sub.Active          = true
+        sub.Draggable       = true
+        Instance.new("UICorner", sub).CornerRadius = UDim.new(0,8)
 
-        -- Fixed close button
-        local closeSub = Instance.new("TextButton", sub)
-        closeSub.Text = "X"
-        closeSub.Size = UDim2.new(0, 30, 0, 30)
-        closeSub.Position = UDim2.new(1, -35, 0, 5)
-        closeSub.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-        closeSub.TextColor3 = Color3.fromRGB(255, 255, 255)
-        closeSub.Font = Enum.Font.GothamBold
-        closeSub.TextSize = 18
-        closeSub.AutoButtonColor = false
-        Instance.new("UICorner", closeSub).CornerRadius = UDim.new(0, 6)
-        closeSub.MouseButton1Click:Connect(function()
-            sub:Destroy()
-        end)
+        -- Close sub
+        local close2 = Instance.new("TextButton", sub)
+        close2.Text             = "X"
+        close2.Size             = UDim2.new(0,30,0,30)
+        close2.Position         = UDim2.new(1,-35,0,5)
+        close2.Font             = Enum.Font.GothamBold
+        close2.TextSize         = 18
+        close2.BackgroundColor3 = Color3.fromRGB(150,0,0)
+        close2.TextColor3       = Color3.fromRGB(255,255,255)
+        close2.AutoButtonColor  = false
+        Instance.new("UICorner", close2).CornerRadius = UDim.new(0,6)
+        close2.MouseButton1Click:Connect(function() sub:Destroy() end)
 
-        -- ScrollingFrame for scripts
+        -- Scrolling scripts list
         local scr = Instance.new("ScrollingFrame", sub)
-        scr.Name = "ScriptList"
-        scr.Size = UDim2.new(1, -20, 1, -50)
-        scr.Position = UDim2.new(0, 10, 0, 40)
+        scr.Name                = "ScriptList"
+        scr.Size                = UDim2.new(1,-20,1,-50)
+        scr.Position            = UDim2.new(0,10,0,40)
         scr.BackgroundTransparency = 1
-        scr.ScrollBarThickness = 6
-        scr.ClipsDescendants = true
+        scr.ScrollBarThickness  = 6
+        scr.ClipsDescendants    = true
         scr.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        scr:SetAttribute("NextOrder",1)
 
-        -- Padding & layout
         local pad = Instance.new("UIPadding", scr)
-        pad.PaddingTop = UDim.new(0, 8)
-        pad.PaddingBottom = UDim.new(0, 8)
-        pad.PaddingLeft = UDim.new(0, 8)
-        pad.PaddingRight = UDim.new(0, 8)
+        pad.PaddingTop    = UDim.new(0,8)
+        pad.PaddingBottom = UDim.new(0,8)
+        pad.PaddingLeft   = UDim.new(0,8)
+        pad.PaddingRight  = UDim.new(0,8)
+
         local list = Instance.new("UIListLayout", scr)
         list.SortOrder = Enum.SortOrder.LayoutOrder
-        list.Padding = UDim.new(0, 10)
-        scr:SetAttribute("NextOrder", 1)
+        list.Padding   = UDim.new(0,10)
 
-        -- Populate based on selection
-        if gameName == "DEAD RAILS" then
-            addScriptButton(scr, "Null-Fire", function()
+        -- Populate according to gameName
+        if name == "DEAD RAILS" then
+            addScriptButton(scr,"Null-Fire",function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScripts/Null-Fire/main/Loader"))()
             end)
-            addScriptButton(scr, "Toggleable Aimlock", function()
+            addScriptButton(scr,"Toggleable Aimlock",function()
                 loadstring(game:HttpGet("https://rawscripts.net/raw/Dead-Rails-Alpha-Alpha-Aimbot-with-bind-30004"))()
             end)
-            addScriptButton(scr, "OP Auto Bonds", function()
-                getgenv().BondFarmSetting = {
-                    tweenDuration = 20, AutoExecute = true,
-                    queue_on_teleport = true, CheckMissedBonds = true
-                }
+            addScriptButton(scr,"OP Auto Bonds",function()
+                getgenv().BondFarmSetting={ tweenDuration=20,AutoExecute=true,queue_on_teleport=true,CheckMissedBonds=true }
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/DonjoScripts/Public-Scripts/refs/heads/Slap-Battles/TheFastestBondStealer.lua"))()
             end)
-            addScriptButton(scr, "Airweld", function()
+            addScriptButton(scr,"Airweld",function()
                 notify("Key: Ringta")
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/hbjrev/airweld.github.io/refs/heads/main/RINGTA.lua"))()
             end)
 
-        elseif gameName == "BLADE BALL" then
-            addScriptButton(scr, "OP Auto Parry & Auto Spam", function()
+        elseif name == "BLADE BALL" then
+            addScriptButton(scr,"OP Auto Parry & Auto Spam",function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Zypherion-X19/Zy/refs/heads/main/Blade-Ball.lua"))()
             end)
 
-        elseif gameName == "GROW A GARDEN" then
-            addScriptButton(scr, "Ronix", function()
+        elseif name == "GROW A GARDEN" then
+            addScriptButton(scr,"Ronix",function()
                 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/a8f02a61fc38bf9256dd0f17be6b16d7.lua"))()
             end)
 
-        elseif gameName == "FISCH" then
-            addScriptButton(scr, "Nathub", function()
+        elseif name == "FISCH" then
+            addScriptButton(scr,"Nathub",function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/ArdyBotzz/NatHub/refs/heads/master/NatHub.lua"))()
             end)
-            addScriptButton(scr, "Beecon Hub", function()
+            addScriptButton(scr,"Beecon Hub",function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/BaconBossScript/BeeconHub/main/BeeconHub"))()
             end)
 
-        elseif gameName == "BLOX FRUITS" then
-            addScriptButton(scr, "Vxeze", function()
+        elseif name == "BLOX FRUITS" then
+            addScriptButton(scr,"Vxeze",function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Dex-Bear/Vxezehub/refs/heads/main/VxezeHubMain"))()
             end)
 
-        elseif gameName == "BLUE LOCK: RIVALS" then
-            addScriptButton(scr, "Fearise Hub", function()
+        elseif name == "BLUE LOCK: RIVALS" then
+            addScriptButton(scr,"Fearise Hub",function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/EnesXVC/Games-Scripts/main/Blue-Lock-Fearise-Hub"))()
             end)
 
-        elseif gameName == "Universal Scripts" then
-            addScriptButton(scr, "Infinite Yield", function()
+        elseif name == "Universal Scripts" then
+            addScriptButton(scr,"Infinite Yield",function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
             end)
 
-        elseif gameName == "Universal Hubs" then
-            addScriptButton(scr, "Ghost Hub", function()
+        elseif name == "Universal Hubs" then
+            addScriptButton(scr,"Ghost Hub",function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/main/GhostHub"))()
             end)
 
-        elseif gameName == "Any DH Games" then
-            addScriptButton(scr, "Camlock", function()
+        elseif name == "Any DH Games" then
+            addScriptButton(scr,"Camlock",function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/CookieScript/Fixscript/refs/heads/main/Psalmsfix"))()
             end)
-            addScriptButton(scr, "Silent Aim", function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/DaddyFelixFucks/TappingSilent/refs/heads/main/SilentAim", true))()
+            addScriptButton(scr,"Silent Aim",function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/DaddyFelixFucks/TappingSilent/refs/heads/main/SilentAim",true))()
             end)
-            addScriptButton(scr, "Anti Lock", function()
+            addScriptButton(scr,"Anti Lock",function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/wenny69420/KirbswareScripts/main/MobileV3"))()
             end)
 
-        elseif gameName == "Murder Mystery 2" then
-            addScriptButton(scr, "YARHM", function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/Joystickplays/psychic-octo-invention/main/yarhm.lua", false))()
+        elseif name == "Murder Mystery 2" then
+            addScriptButton(scr,"YARHM",function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/Joystickplays/psychic-octo-invention/main/yarhm.lua",false))()
             end)
 
-        elseif gameName == "ARSENAL" then
-            addScriptButton(scr, "QUOTAS HUB (OP)", function()
+        elseif name == "ARSENAL" then
+            addScriptButton(scr,"QUOTAS HUB (OP)",function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/Insertl/QuotasHub/main/BETAv1.3"))()
             end)
         end
     end)
 end
 
--- Toggle main GUI on/off
-local isOpen = false
+-- Toggle Main GUI
 toggleButton.MouseButton1Click:Connect(function()
-    isOpen = not isOpen
-    mainGui.Enabled = isOpen
+    mainFrame.Visible = not mainFrame.Visible
+    toggleButton.Text = mainFrame.Visible and "Close MUI HUB" or "Open MUI HUB"
 end)
